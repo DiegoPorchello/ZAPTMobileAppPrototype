@@ -1,0 +1,10 @@
+{
+  "description": "Connects users with local service professionals on demand, allowing easy service requests, real-time tracking, and secure payments for a seamless experience.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
