@@ -130,7 +130,14 @@ function BottomNav({ mode, current, go }: { mode: "client" | "pro"; current: Scr
     ["Ganhos", WalletCards, "wallet"], ["Perfil", User, "proProfile"],
   ] as const;
   const items = mode === "client" ? client : professional;
-  return <div className={`bottom-nav ${mode === "pro" ? "pro-bottom-nav" : ""}`}>{items.map(([label, Icon, screen]) => <div key={label} className={`nav-item ${current === screen ? "active" : ""}`} role="button" onClick={() => go(screen)}><i className="nav-glow" /><Icon size={20} /><span>{label}</span></div>)}</div>;
+  const clientRequestFlow: Screen[] = ["proposals", "chosen", "tracking", "arrived", "active", "completed", "payment", "review"];
+  const proServiceFlow: Screen[] = ["accepted", "startCode", "proActive", "finish"];
+  const activeScreen = mode === "client" && clientRequestFlow.includes(current)
+    ? "proposals"
+    : mode === "pro" && proServiceFlow.includes(current)
+      ? "proActive"
+      : current;
+  return <div className={`bottom-nav floating-bottom-nav ${mode}-bottom-nav`}>{items.map(([label, Icon, screen]) => <div key={label} className={`nav-item ${activeScreen === screen ? "active" : ""}`} role="button" onClick={() => go(screen)}><i className="nav-glow" /><Icon size={20} /><span>{label}</span></div>)}</div>;
 }
 
 function MapRadar({ mode = "idle", route = false, opportunities = false, onSelect }: { mode?: "idle" | "searching" | "found"; route?: boolean; opportunities?: boolean; onSelect?: (index: number) => void }) {
@@ -212,7 +219,7 @@ function Sent({ go }: { go: (s: Screen) => void }) {
 }
 
 function Proposals({ go, back }: { go: (s: Screen) => void; back: () => void }) {
-  return <ScreenShell current="proposals" go={go}><Header title="Propostas recebidas" back={back} right={<span className="count-badge">3</span>} /><div className="live-note"><span className="pulse-dot" /> Novas propostas em tempo real</div>{pros.slice(0, 3).map((person, index) => <div className="proposal-card" key={person.name}><div className="proposal-head"><Avatar person={person} /><div><strong>{person.name}</strong><span><Star size={13} fill="currentColor" /> {person.rating} • {index + 3} min</span></div><strong className="price">{person.price}</strong></div><p>{index === 0 ? "Posso chegar agora. Material básico e garantia inclusos." : "Atendimento completo com diagnóstico no local."}</p><div className="dual-actions"><Action variant="ghost">Recusar</Action><Action onClick={() => go("chosen")}>Aceitar</Action></div></div>)}</ScreenShell>;
+  return <ScreenShell nav="client" current="proposals" go={go}><Header title="Propostas recebidas" back={back} right={<span className="count-badge">3</span>} /><div className="live-note"><span className="pulse-dot" /> Novas propostas em tempo real</div>{pros.slice(0, 3).map((person, index) => <div className="proposal-card" key={person.name}><div className="proposal-head"><Avatar person={person} /><div><strong>{person.name}</strong><span><Star size={13} fill="currentColor" /> {person.rating} • {index + 3} min</span></div><strong className="price">{person.price}</strong></div><p>{index === 0 ? "Posso chegar agora. Material básico e garantia inclusos." : "Atendimento completo com diagnóstico no local."}</p><div className="dual-actions"><Action variant="ghost">Recusar</Action><Action onClick={() => go("chosen")}>Aceitar</Action></div></div>)}</ScreenShell>;
 }
 
 function Chosen({ go }: { go: (s: Screen) => void }) {
@@ -220,7 +227,7 @@ function Chosen({ go }: { go: (s: Screen) => void }) {
 }
 
 function Tracking({ go, back, professional = false }: { go: (s: Screen) => void; back: () => void; professional?: boolean }) {
-  return <ScreenShell current={professional ? "accepted" : "tracking"} go={go} className="tracking"><Header title={professional ? "Rota até o cliente" : "Bruno está a caminho"} back={back} /><MapRadar mode="found" route /><div className="tracking-card"><div className="eta-badge"><span>Chegada em</span><strong>3 min</strong></div><ProCard person={pros[0]} compact /><div className="dual-actions"><Action variant="secondary" onClick={() => go("chat")}><MessageCircle size={18} /> Mensagem</Action><Action onClick={() => go(professional ? "startCode" : "arrived")}><Phone size={18} /> {professional ? "Cheguei" : "Ligação"}</Action></div>{!professional && <div className="tracking-code"><ShieldCheck size={19} /><div><span>Código do serviço</span><strong>482 731</strong><small>Compartilhe apenas quando Bruno chegar</small></div></div>}</div></ScreenShell>;
+  return <ScreenShell nav={professional ? "pro" : "client"} current={professional ? "accepted" : "tracking"} go={go} className="tracking"><Header title={professional ? "Rota até o cliente" : "Bruno está a caminho"} back={back} /><MapRadar mode="found" route /><div className="tracking-card"><div className="eta-badge"><span>Chegada em</span><strong>3 min</strong></div><ProCard person={pros[0]} compact /><div className="dual-actions"><Action variant="secondary" onClick={() => go("chat")}><MessageCircle size={18} /> Mensagem</Action><Action onClick={() => go(professional ? "startCode" : "arrived")}><Phone size={18} /> {professional ? "Cheguei" : "Ligação"}</Action></div>{!professional && <div className="tracking-code"><ShieldCheck size={19} /><div><span>Código do serviço</span><strong>482 731</strong><small>Compartilhe apenas quando Bruno chegar</small></div></div>}</div></ScreenShell>;
 }
 
 function SecurityCode({ go, professional = false }: { go: (s: Screen) => void; professional?: boolean }) {
